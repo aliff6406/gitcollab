@@ -1,5 +1,6 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
+// Routes that can be access when not authed
 const isPublicRoute = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)"]);
 
 export default clerkMiddleware(async (auth, request) => {
