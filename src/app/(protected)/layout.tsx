@@ -11,7 +11,7 @@ const SidebarLayout = ({ children }: SidebarLayoutProps) => {
       <AppSidebar />
       <main className="m-2 w-full">
         {/* top bar */}
-        <div className="flex items-center gap-2 rounded-md border border-sidebar-border bg-sidebar p-2 px-4 shadow">
+        <div className="mb-4 flex items-center gap-2 rounded-md border border-sidebar-border bg-sidebar p-2 px-4 shadow">
           {/* <SearchBar /> */}
           <div className="ml-auto"></div>
           <UserButton />
