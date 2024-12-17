@@ -2,20 +2,38 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { api } from "@/trpc/react";
 import Image from "next/image";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 type FormInput = {
-  repoUrl: string;
   projectName: string;
+  repoUrl: string;
   githubToken?: string;
 };
 
 const CreatePage = () => {
   const { register, handleSubmit, reset } = useForm<FormInput>();
+  const createProject = api.project.createProject.useMutation();
 
   function onSubmit(data: FormInput) {
-    window.alert(JSON.stringify(data, null, 2));
+    console.log("data: ", data);
+    createProject.mutate(
+      {
+        name: data.projectName,
+        githubUrl: data.repoUrl,
+        githubToken: data.githubToken,
+      },
+      {
+        onSuccess: () => {
+          toast.success("Project created successfully");
+        },
+        onError: () => {
+          toast.error("Failed to create project");
+        },
+      },
+    );
     return true;
   }
 
@@ -40,13 +58,13 @@ const CreatePage = () => {
         <div>
           <form onSubmit={handleSubmit(onSubmit)}>
             <Input
-              {...(register("repoUrl"), { required: true })}
+              {...register("projectName", { required: true })}
               placeholder="Project Name"
               required
             />
             <div className="h-2"></div>
             <Input
-              {...(register("repoUrl"), { required: true })}
+              {...register("repoUrl", { required: true })}
               placeholder="GitHub URL"
               type="url"
               required
@@ -57,7 +75,9 @@ const CreatePage = () => {
               placeholder="GitHub Token (Optional)"
             />
             <div className="h-2"></div>
-            <Button type="submit">Create Project</Button>
+            <Button type="submit" disabled={createProject.isPending}>
+              Create Project
+            </Button>
           </form>
         </div>
       </div>
