@@ -29,10 +29,10 @@ export const getCommitHashes = async (
 
   return sortedCommits.slice(0, 15).map((commit) => ({
     commitHash: commit.sha ?? "",
-    commitMessage: commit.commit.message ?? ("" as string),
+    commitMessage: commit.commit.message ?? "",
     commitAuthorName: commit.commit.author?.name ?? "",
     commitAuthorAvatar: commit.author?.avatar_url ?? "",
-    commitDate: commit.commit.author?.date,
+    commitDate: commit.commit.author?.date ?? "",
   }));
 };
 
