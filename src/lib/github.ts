@@ -1,3 +1,4 @@
+import { db } from "@/server/db";
 import { Octokit } from "octokit";
 
 export const octokit = new Octokit({
@@ -17,9 +18,13 @@ type Response = {
 export const getCommitHashes = async (
   githubUrl: string,
 ): Promise<Response[]> => {
+  const [owner, repo] = githubUrl.split("/").slice(-2);
+  if (!owner || !repo) {
+    throw new Error("Invalid github url");
+  }
   const { data } = await octokit.rest.repos.listCommits({
-    owner: "docker",
-    repo: "genai-stack",
+    owner: owner,
+    repo: repo,
   });
   const sortedCommits = data.sort(
     (a, b) =>
@@ -36,4 +41,45 @@ export const getCommitHashes = async (
   }));
 };
 
-console.log(await getCommitHashes(githubUrl));
+export const pollCommits = async (projectId: string) => {
+  const { project, githubUrl } = await fetchProjectGithubUrl(projectId);
+  const commitHashes = await getCommitHashes(githubUrl);
+  const unprocessedCommits = await filterUnprocessedCommits(
+    projectId,
+    commitHashes,
+  );
+  console.log(unprocessedCommits);
+};
+
+// async function summariseCommits(githubUrl: string, commitHash: string) {}
+
+async function fetchProjectGithubUrl(projectId: string) {
+  const project = await db.project.findUnique({
+    where: { id: projectId },
+    select: {
+      githubUrl: true,
+    },
+  });
+  if (!project?.githubUrl) {
+    throw new Error("Project has no github url");
+  }
+  return { project, githubUrl: project?.githubUrl };
+}
+
+async function filterUnprocessedCommits(
+  projectId: string,
+  commitHashes: Response[],
+) {
+  const processedCommits = await db.gitCommit.findMany({
+    where: { projectId: projectId },
+  });
+  const unprocessedCommits = commitHashes.filter(
+    (commit) =>
+      !processedCommits.some(
+        (processedCommits) => processedCommits.commitHash === commit.commitHash,
+      ),
+  );
+  return unprocessedCommits;
+}
+
+await pollCommits("cm4vwhm0e0000pht48eje4l10").then(console.log);
