@@ -1,5 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { db } from "@/server/db";
 import { Octokit } from "octokit";
+import axios from "axios";
+import { aiSummariseCommitDiff } from "./gemini";
 
 export const octokit = new Octokit({
   auth: process.env.GITHUB_TOKEN,
@@ -42,16 +46,59 @@ export const getCommitHashes = async (
 };
 
 export const pollCommits = async (projectId: string) => {
+  // fetch the url of the repo by projectId
   const { project, githubUrl } = await fetchProjectGithubUrl(projectId);
+
+  // get the previous 15 commits of the github repo
   const commitHashes = await getCommitHashes(githubUrl);
+
+  // get commits that have not been processed and stored in the db
   const unprocessedCommits = await filterUnprocessedCommits(
     projectId,
     commitHashes,
   );
-  console.log(unprocessedCommits);
+
+  const summaryResponses = await Promise.allSettled(
+    unprocessedCommits.map((commit) => {
+      return summariseCommit(githubUrl, commit.commitHash);
+    }),
+  );
+
+  const summaries = summaryResponses.map((response) => {
+    if (response.status === "fulfilled") {
+      return response.value;
+    }
+  });
+
+  console.log("summaries: ", summaries);
+
+  // const commits = await db.gitCommit.createMany({
+  //   data: summaries.map((summary, index) => {
+  //     console.log(`processing commit ${index}`);
+  //     return {
+  //       projectId: projectId,
+  //       commitHash: unprocessedCommits[index]!.commitHash,
+  //       commitMessage: unprocessedCommits[index]!.commitMessage,
+  //       commitAuthorName: unprocessedCommits[index]!.commitAuthorName,
+  //       commitAuthorAvatar: unprocessedCommits[index]!.commitAuthorAvatar,
+  //       commitDate: unprocessedCommits[index]!.commitDate,
+  //       summary: summary!,
+  //     };
+  //   }),
+  // });
+
+  // return commits;
 };
 
-// async function summariseCommits(githubUrl: string, commitHash: string) {}
+async function summariseCommit(githubUrl: string, commitHash: string) {
+  const { data } = await axios.get(`${githubUrl}/commit/${commitHash}.diff`, {
+    headers: {
+      Accept: "application/vnd.github.v3.diff",
+    },
+  });
+  console.log("data: ", data);
+  return (await aiSummariseCommitDiff(data)) ?? "";
+}
 
 async function fetchProjectGithubUrl(projectId: string) {
   const project = await db.project.findUnique({
@@ -82,4 +129,4 @@ async function filterUnprocessedCommits(
   return unprocessedCommits;
 }
 
-await pollCommits("cm4vwhm0e0000pht48eje4l10").then(console.log);
+await pollCommits("cm4xgj6it0000xsd5k4crjcu7").then(console.log);

@@ -6,7 +6,7 @@ const model = genAI.getGenerativeModel({
   model: "gemini-1.5-flash",
 });
 
-export const summariseCommit = async (diff: string) => {
+export const aiSummariseCommitDiff = async (diff: string) => {
   const response = await model.generateContent([
     promptVer1,
     `Please summarise the following file: \n\n${diff}`,
@@ -14,5 +14,3 @@ export const summariseCommit = async (diff: string) => {
 
   return response.response.text();
 };
-
-
