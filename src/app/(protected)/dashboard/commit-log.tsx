@@ -4,7 +4,6 @@ import useProject from "@/hooks/use-project";
 import { cn } from "@/lib/utils";
 import { api } from "@/trpc/react";
 import { ExternalLink } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 
 const CommitLog = () => {
@@ -40,7 +39,7 @@ const CommitLog = () => {
                       className="py-0.5 text-xs leading-5 text-gray-500"
                     >
                       <span className="font-medium text-gray-900">
-                        {commit.commitMessage}
+                        {commit.commitAuthorName}
                       </span>{" "}
                       <span className="inline-flex items-center">
                         commited

@@ -50,6 +50,8 @@ export const projectRouter = createTRPCRouter({
       }),
     )
     .query(async ({ ctx, input }) => {
+      // check if there are new commits
+      pollCommits(input.projectId).then().catch(console.error);
       return await ctx.db.gitCommit.findMany({
         where: {
           projectId: input.projectId,
