@@ -21,7 +21,6 @@ const CreatePage = () => {
   const refetch = useRefetch();
 
   function onSubmit(data: FormInput) {
-    console.log("data: ", data);
     createProject.mutate(
       {
         name: data.projectName,

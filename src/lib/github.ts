@@ -72,7 +72,6 @@ export const pollCommits = async (projectId: string) => {
 
   const commits = await db.gitCommit.createMany({
     data: summaries.map((summary, index) => {
-      console.log(`processing commit ${index}`);
       return {
         projectId: projectId,
         commitHash: unprocessedCommits[index]!.commitHash,
@@ -94,7 +93,6 @@ async function summariseCommit(githubUrl: string, commitHash: string) {
       Accept: "application/vnd.github.v3.diff",
     },
   });
-  console.log("data: ", data);
   return (await aiSummariseCommitDiff(data)) ?? "";
 }
 
@@ -127,4 +125,4 @@ async function filterUnprocessedCommits(
   return unprocessedCommits;
 }
 
-// await pollCommits("cm4xgj6it0000xsd5k4crjcu7").then(console.log);
+// await pollCommits("cm4xh1v3c0003538dww26mvxr").then(console.log);
