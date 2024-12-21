@@ -72,22 +72,22 @@ export const pollCommits = async (projectId: string) => {
 
   console.log("summaries: ", summaries);
 
-  // const commits = await db.gitCommit.createMany({
-  //   data: summaries.map((summary, index) => {
-  //     console.log(`processing commit ${index}`);
-  //     return {
-  //       projectId: projectId,
-  //       commitHash: unprocessedCommits[index]!.commitHash,
-  //       commitMessage: unprocessedCommits[index]!.commitMessage,
-  //       commitAuthorName: unprocessedCommits[index]!.commitAuthorName,
-  //       commitAuthorAvatar: unprocessedCommits[index]!.commitAuthorAvatar,
-  //       commitDate: unprocessedCommits[index]!.commitDate,
-  //       summary: summary!,
-  //     };
-  //   }),
-  // });
+  const commits = await db.gitCommit.createMany({
+    data: summaries.map((summary, index) => {
+      console.log(`processing commit ${index}`);
+      return {
+        projectId: projectId,
+        commitHash: unprocessedCommits[index]!.commitHash,
+        commitMessage: unprocessedCommits[index]!.commitMessage,
+        commitAuthorName: unprocessedCommits[index]!.commitAuthorName,
+        commitAuthorAvatar: unprocessedCommits[index]!.commitAuthorAvatar,
+        commitDate: unprocessedCommits[index]!.commitDate,
+        summary: summary!,
+      };
+    }),
+  });
 
-  // return commits;
+  return commits;
 };
 
 async function summariseCommit(githubUrl: string, commitHash: string) {
@@ -129,4 +129,4 @@ async function filterUnprocessedCommits(
   return unprocessedCommits;
 }
 
-await pollCommits("cm4xgj6it0000xsd5k4crjcu7").then(console.log);
+// await pollCommits("cm4xgj6it0000xsd5k4crjcu7").then(console.log);
