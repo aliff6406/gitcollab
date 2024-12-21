@@ -70,8 +70,6 @@ export const pollCommits = async (projectId: string) => {
     }
   });
 
-  console.log("summaries: ", summaries);
-
   const commits = await db.gitCommit.createMany({
     data: summaries.map((summary, index) => {
       console.log(`processing commit ${index}`);
